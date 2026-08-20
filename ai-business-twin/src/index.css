@@ -1,0 +1,84 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  color: #172033;
+}
+
+button {
+  cursor: pointer;
+}
+
+.front-page {
+  min-height: 100vh;
+  padding: 60px 8%;
+  text-align: center;
+}
+
+.front-page h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.front-page > p {
+  max-width: 700px;
+  margin: 0 auto 40px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.capabilities {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.capability-card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.capability-card h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.capability-card p {
+  line-height: 1.5;
+  color: #5f6877;
+}
+
+.front-page button {
+  margin-top: 40px;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 10px;
+  background: #146c5b;
+  color: white;
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .capabilities {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .capabilities {
+    grid-template-columns: 1fr;
+  }
+
+  .front-page h1 {
+    font-size: 36px;
+  }
+}
