@@ -1,109 +1,84 @@
 import { useState } from "react";
 
 function Ratings() {
-  const [ratings, setRatings] = useState({
-    business: 0,
-    sustainability: 0,
-    ai: 0,
-  });
-
-  const [feedback, setFeedback] = useState("");
-
-  const updateRating = (type, value) => {
-    setRatings((previous) => ({
-      ...previous,
-      [type]: value,
-    }));
-  };
-
-  const average =
-    (
-      ratings.business +
-      ratings.sustainability +
-      ratings.ai
-    ) / 3;
-
-  const RatingStars = ({ type }) => {
-    return (
-      <div>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => updateRating(type, star)}
-            style={{
-              fontSize: "28px",
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-            }}
-          >
-            {star <= ratings[type] ? "★" : "☆"}
-          </button>
-        ))}
-      </div>
-    );
-  };
+  const [rating, setRating] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div>
-      <h1>Rate</h1>
+    <div className="page-container fade-in">
 
-      <p>
-        Rate your experience with AI Business Twin.
-      </p>
-
-      <div className="dashboard-section">
-        <h2>Overall Business Rating</h2>
-        <RatingStars type="business" />
+      <div className="page-header">
+        <div>
+          <h1>Ratings & Feedback</h1>
+          <p>
+            Tell us how your Business Twin experience is going.
+          </p>
+        </div>
       </div>
 
-      <div className="dashboard-section">
-        <h2>Sustainability Rating</h2>
-        <RatingStars type="sustainability" />
-      </div>
+      <div className="card">
 
-      <div className="dashboard-section">
-        <h2>AI Recommendation Rating</h2>
-        <RatingStars type="ai" />
-      </div>
+        <h2>Rate your experience</h2>
 
-      <div className="dashboard-section">
-        <h2>Average Rating</h2>
+        <p style={{ color: "#64748b" }}>
+          Your feedback helps improve the platform.
+        </p>
 
-        <h1>
-          {average.toFixed(1)} / 5
-        </h1>
-      </div>
+        <div className="rating-stars">
 
-      <div className="dashboard-section">
-        <h2>User Feedback & Review</h2>
+          {[1, 2, 3, 4, 5].map((number) => (
+            <span
+              key={number}
+              className={`rating-star ${
+                number <= rating
+                  ? "selected"
+                  : ""
+              }`}
+              onClick={() => {
+                setRating(number);
+                setSubmitted(false);
+              }}
+            >
+              ★
+            </span>
+          ))}
+
+        </div>
+
+        {rating > 0 && (
+          <p>
+            You selected <strong>{rating}/5</strong>
+          </p>
+        )}
 
         <textarea
-          rows="5"
-          value={feedback}
-          onChange={(event) =>
-            setFeedback(event.target.value)
-          }
+          className="form-control"
           placeholder="Write your feedback..."
+          style={{
+            marginTop: 15,
+            maxWidth: 700,
+          }}
         />
 
-        <br />
-
         <button
-          onClick={() => {
-            if (!feedback.trim()) {
-              alert("Please enter your feedback.");
-              return;
-            }
-
-            alert("Thank you for your feedback!");
-            setFeedback("");
-          }}
+          className="btn btn-primary"
+          style={{ marginTop: 15 }}
+          onClick={() => setSubmitted(true)}
         >
           Submit Feedback
         </button>
+
+        {submitted && (
+          <div
+            className="alert alert-success"
+            style={{ maxWidth: 700 }}
+          >
+            Thank you for your feedback! ⭐
+          </div>
+        )}
+
       </div>
+
     </div>
   );
 }

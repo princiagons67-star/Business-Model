@@ -21,6 +21,7 @@ function Register() {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -31,17 +32,21 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
 
+    // =========================
+    // FRONTEND VALIDATION
+    // =========================
+
     if (
-      !form.name ||
-      !form.email ||
+      !form.name.trim() ||
+      !form.email.trim() ||
       !form.password ||
-      !form.startupName ||
-      !form.industry
+      !form.startupName.trim() ||
+      !form.industry.trim()
     ) {
       setError("Please fill in all required fields.");
       return;
@@ -59,55 +64,107 @@ function Register() {
       return;
     }
 
-    // USER DATA
-    const userData = {
-      name: form.name,
-      email: form.email,
-      password: form.password,
-      phone: form.phone,
-      role: form.role,
-    };
+    try {
+      setLoading(true);
 
-    // PROFILE DATA
-    const profileData = {
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      role: form.role,
-    };
+      // =========================
+      // SEND DATA TO BACKEND
+      // =========================
 
-    // STARTUP DATA
-    const startupData = {
-      startupName: form.startupName,
-      industry: form.industry,
-      businessModel: form.businessModel,
-      employees: form.employees,
-      targetMarket: form.targetMarket,
-      startupStage: form.startupStage,
-      businessGoals: form.businessGoals,
-    };
+      const response = await fetch(
+        "http://localhost:5000/api/auth/register",
+        {
+          method: "POST",
 
-    localStorage.setItem(
-      "userData",
-      JSON.stringify(userData)
-    );
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-    localStorage.setItem(
-      "profileData",
-      JSON.stringify(profileData)
-    );
+          body: JSON.stringify({
+            name: form.name.trim(),
+            email: form.email.trim(),
+            password: form.password,
+            phone: form.phone.trim(),
+            role: form.role.trim(),
 
-    localStorage.setItem(
-      "startupData",
-      JSON.stringify(startupData)
-    );
+            startupName: form.startupName.trim(),
+            industry: form.industry.trim(),
+            businessModel: form.businessModel,
+            employees: form.employees,
+            targetMarket: form.targetMarket.trim(),
+            startupStage: form.startupStage,
+            businessGoals: form.businessGoals.trim(),
+          }),
+        }
+      );
 
-    localStorage.setItem(
-      "isLoggedIn",
-      "true"
-    );
+      const data = await response.json();
 
-    navigate("/dashboard");
+      // =========================
+      // BACKEND ERROR
+      // =========================
+
+      if (!response.ok) {
+        setError(
+          data.message || "Registration failed."
+        );
+
+        return;
+      }
+
+      // =========================
+      // REGISTRATION SUCCESS
+      // =========================
+
+      console.log(
+        "Registration successful:",
+        data
+      );
+
+      /*
+        We only keep basic session information
+        on the frontend.
+
+        The actual account and startup data
+        belongs to the backend/database.
+      */
+
+      localStorage.setItem(
+        "userId",
+        String(data.user.id)
+      );
+
+      localStorage.setItem(
+        "userName",
+        data.user.name
+      );
+
+      localStorage.setItem(
+        "userEmail",
+        data.user.email
+      );
+
+      localStorage.setItem(
+        "isLoggedIn",
+        "true"
+      );
+
+      // Go to dashboard
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error(
+        "Registration error:",
+        error
+      );
+
+      setError(
+        "Unable to connect to the server. Make sure the backend is running."
+      );
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -127,6 +184,10 @@ function Register() {
         </p>
 
         <form onSubmit={handleSubmit}>
+
+          {/* =========================
+              PERSONAL INFORMATION
+          ========================== */}
 
           <h2>Personal Information</h2>
 
@@ -180,6 +241,10 @@ function Register() {
             placeholder="Founder / CEO / Student"
           />
 
+          {/* =========================
+              STARTUP INFORMATION
+          ========================== */}
+
           <h2>Startup Information</h2>
 
           <label>Startup Name *</label>
@@ -213,11 +278,17 @@ function Register() {
               Select business model
             </option>
 
-            <option value="B2B">B2B</option>
+            <option value="B2B">
+              B2B
+            </option>
 
-            <option value="B2C">B2C</option>
+            <option value="B2C">
+              B2C
+            </option>
 
-            <option value="B2B2C">B2B2C</option>
+            <option value="B2B2C">
+              B2B2C
+            </option>
 
             <option value="Subscription">
               Subscription
@@ -259,7 +330,9 @@ function Register() {
               Select startup stage
             </option>
 
-            <option value="Idea">Idea</option>
+            <option value="Idea">
+              Idea
+            </option>
 
             <option value="Pre-seed">
               Pre-seed
@@ -288,14 +361,32 @@ function Register() {
             rows="5"
           />
 
+          {/* =========================
+              ERROR
+          ========================== */}
+
           {error && (
-            <p style={{ color: "red" }}>
+            <p
+              style={{
+                color: "red",
+                marginTop: "10px",
+              }}
+            >
               {error}
             </p>
           )}
 
-          <button type="submit">
-            Create Account & Start
+          {/* =========================
+              SUBMIT
+          ========================== */}
+
+          <button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Creating Account..."
+              : "Create Account & Start"}
           </button>
 
         </form>

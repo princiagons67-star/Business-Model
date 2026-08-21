@@ -6,59 +6,39 @@ function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const submit = (e) => {
+    e.preventDefault();
 
     setError("");
 
-    if (!email.trim()) {
-      setError("Please enter your email.");
+    if (!email || !password) {
+      setError("Please enter your email and password.");
       return;
     }
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (!password.trim()) {
-      setError("Please enter your password.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must contain at least 6 characters.");
-      return;
-    }
-
-    const savedUser = localStorage.getItem("userData");
-
-    if (!savedUser) {
-      setError("No account found. Please create an account first.");
-      return;
-    }
-
-    const user = JSON.parse(savedUser);
+    const savedUser = JSON.parse(
+      localStorage.getItem("userData") || "null"
+    );
 
     if (
-      email.toLowerCase() !== user.email.toLowerCase() ||
-      password !== user.password
+      savedUser &&
+      savedUser.email === email &&
+      savedUser.password === password
     ) {
-      setError("Incorrect email or password.");
+      localStorage.setItem(
+        "isLoggedIn",
+        "true"
+      );
+
+      navigate("/dashboard");
       return;
     }
 
-    localStorage.setItem("isLoggedIn", "true");
-
-    if (rememberMe) {
-      localStorage.setItem("rememberMe", "true");
-    }
-
-    navigate("/dashboard");
+    setError(
+      "Account not found or password is incorrect."
+    );
   };
 
   return (
@@ -66,68 +46,56 @@ function SignIn() {
 
       <div className="auth-card">
 
-        <h1>Welcome Back</h1>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 25,
+          }}
+        >
+          <div
+            className="brand-icon"
+            style={{
+              margin: "0 auto 12px",
+            }}
+          >
+            AI
+          </div>
 
-        <p>
-          Sign in to your AI Business Twin account.
-        </p>
+          <h1>Welcome Back</h1>
 
-        <form onSubmit={handleSubmit}>
+          <p>
+            Sign in to your AI Business Twin.
+          </p>
+        </div>
 
-          <label>Email / Username</label>
+        <form onSubmit={submit}>
+
+          <label>Email</label>
 
           <input
             type="email"
             value={email}
-            onChange={(event) =>
-              setEmail(event.target.value)
+            onChange={(e) =>
+              setEmail(e.target.value)
             }
-            placeholder="Enter your email"
+            placeholder="you@example.com"
           />
 
           <label>Password</label>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-            }}
-          >
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Enter your password"
-            />
-
-            <button
-              type="button"
-              onClick={() =>
-                setShowPassword(!showPassword)
-              }
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-
-          <label>
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={() =>
-                setRememberMe(!rememberMe)
-              }
-            />
-
-            Remember Me
-          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+            placeholder="Enter your password"
+          />
 
           {error && (
-            <p style={{ color: "red" }}>
+            <div className="alert alert-error">
               {error}
-            </p>
+            </div>
           )}
 
           <button type="submit">
@@ -136,18 +104,23 @@ function SignIn() {
 
         </form>
 
-        <p>
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: 20,
+          }}
+        >
           <Link to="/forgot-password">
-            Forgot Password?
+            Forgot password?
           </Link>
-        </p>
 
-        <p>
-          New user?{" "}
-          <Link to="/signup">
-            Create Account
-          </Link>
-        </p>
+          <p>
+            Don't have an account?{" "}
+            <Link to="/register">
+              Create one
+            </Link>
+          </p>
+        </div>
 
       </div>
 

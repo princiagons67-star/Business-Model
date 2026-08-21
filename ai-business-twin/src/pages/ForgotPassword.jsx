@@ -4,43 +4,17 @@ import { Link } from "react-router-dom";
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    setError("");
-    setMessage("");
-
-    if (!email.trim()) {
-      setError("Please enter your email.");
-      return;
-    }
+  const submit = (e) => {
+    e.preventDefault();
 
     if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    const savedUser = localStorage.getItem("userData");
-
-    if (!savedUser) {
-      setError("No account found.");
-      return;
-    }
-
-    const user = JSON.parse(savedUser);
-
-    if (
-      email.toLowerCase() !==
-      user.email.toLowerCase()
-    ) {
-      setError("No account found with this email.");
+      setMessage("Please enter a valid email address.");
       return;
     }
 
     setMessage(
-      "Password reset instructions would be sent to your email."
+      "If an account exists with this email, password reset instructions will be provided."
     );
   };
 
@@ -52,43 +26,37 @@ function ForgotPassword() {
         <h1>Forgot Password?</h1>
 
         <p>
-          Enter your registered email address.
+          Enter your email address to continue.
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={submit}>
 
-          <label>Email</label>
+          <label>Email Address</label>
 
           <input
             type="email"
             value={email}
-            onChange={(event) =>
-              setEmail(event.target.value)
+            onChange={(e) =>
+              setEmail(e.target.value)
             }
-            placeholder="Enter your email"
+            placeholder="you@example.com"
           />
 
-          {error && (
-            <p style={{ color: "red" }}>
-              {error}
-            </p>
-          )}
-
           {message && (
-            <p style={{ color: "green" }}>
+            <div className="alert alert-info">
               {message}
-            </p>
+            </div>
           )}
 
           <button type="submit">
-            Reset Password
+            Continue
           </button>
 
         </form>
 
-        <p>
+        <p style={{ marginTop: 20 }}>
           <Link to="/signin">
-            Back to Sign In
+            ← Back to Sign In
           </Link>
         </p>
 

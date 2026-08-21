@@ -10,160 +10,144 @@ function Profile() {
 
   const [saved, setSaved] = useState(false);
 
-  // Load profile information
   useEffect(() => {
-    const savedProfile = localStorage.getItem("profileData");
+    try {
+      const data = JSON.parse(
+        localStorage.getItem("profileData") || "{}"
+      );
 
-    if (savedProfile) {
-      setProfile(JSON.parse(savedProfile));
-      return;
-    }
-
-    // If profile doesn't exist yet, use registration user data
-    const registeredUser = localStorage.getItem("userData");
-
-    if (registeredUser) {
-      const user = JSON.parse(registeredUser);
-
-      setProfile({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        role: user.role || "",
-      });
+      setProfile((prev) => ({
+        ...prev,
+        ...data,
+      }));
+    } catch {
+      console.log("Profile loading error");
     }
   }, []);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const update = (e) => {
+    setProfile({
+      ...profile,
+      [e.target.name]: e.target.value,
+    });
 
-    setProfile((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+    setSaved(false);
   };
 
-  const handleSave = (event) => {
-    event.preventDefault();
-
+  const save = () => {
     localStorage.setItem(
       "profileData",
       JSON.stringify(profile)
     );
 
+    localStorage.setItem(
+      "userData",
+      JSON.stringify(profile)
+    );
+
     setSaved(true);
-
-    setTimeout(() => {
-      setSaved(false);
-    }, 2000);
-  };
-
-  const getInitial = () => {
-    if (!profile.name) {
-      return "U";
-    }
-
-    return profile.name
-      .charAt(0)
-      .toUpperCase();
   };
 
   return (
-    <div>
-      <h1>Profile</h1>
+    <div className="page-container fade-in">
 
-      <p>
-        Manage your personal profile information.
-      </p>
-
-      <div className="dashboard-section">
-
-        {/* AVATAR */}
-
-        <div
-          style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            background: "#2563eb",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "32px",
-            fontWeight: "bold",
-            marginBottom: "20px",
-          }}
-        >
-          {getInitial()}
+      <div className="page-header">
+        <div>
+          <h1>My Profile</h1>
+          <p>Manage your personal information.</p>
         </div>
+      </div>
 
-        {/* PROFILE FORM */}
+      <div className="grid-2">
 
-        <form onSubmit={handleSave}>
+        <div className="card">
 
-          <h2>Profile Information</h2>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 18,
+              marginBottom: 25,
+            }}
+          >
 
-          <label>
-            Name
-          </label>
+            <div className="sidebar-avatar">
+              {profile.name
+                ? profile.name.charAt(0).toUpperCase()
+                : "U"}
+            </div>
 
-          <input
-            type="text"
-            name="name"
-            value={profile.name}
-            onChange={handleChange}
-            placeholder="Your name"
-          />
+            <div>
+              <h2 style={{ margin: 0 }}>
+                {profile.name || "Your Name"}
+              </h2>
 
-          <label>
-            Email
-          </label>
+              <p
+                style={{
+                  margin: "3px 0",
+                  color: "#64748b",
+                }}
+              >
+                {profile.role || "Founder"}
+              </p>
+            </div>
 
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            onChange={handleChange}
-            placeholder="Your email"
-          />
+          </div>
 
-          <label>
-            Phone
-          </label>
+          {[
+            ["name", "Full Name"],
+            ["email", "Email"],
+            ["phone", "Phone"],
+            ["role", "Role"],
+          ].map(([name, label]) => (
+            <div className="form-group" key={name}>
+              <label>{label}</label>
 
-          <input
-            type="tel"
-            name="phone"
-            value={profile.phone}
-            onChange={handleChange}
-            placeholder="Your phone number"
-          />
+              <input
+                className="form-control"
+                name={name}
+                value={profile[name]}
+                onChange={update}
+              />
+            </div>
+          ))}
 
-          <label>
-            Role
-          </label>
-
-          <input
-            type="text"
-            name="role"
-            value={profile.role}
-            onChange={handleChange}
-            placeholder="Founder, CEO, Student, etc."
-          />
-
-          <button type="submit">
+          <button
+            className="btn btn-primary"
+            onClick={save}
+          >
             Save Profile
           </button>
 
           {saved && (
-            <p>
+            <div
+              className="alert alert-success"
+              style={{ marginTop: 15 }}
+            >
               Profile saved successfully.
-            </p>
+            </div>
           )}
 
-        </form>
+        </div>
+
+        <div className="card">
+
+          <h2>Profile Overview</h2>
+
+          <p style={{ color: "#64748b" }}>
+            Your profile information is used to personalise
+            your Business Twin experience.
+          </p>
+
+          <div className="alert alert-info">
+            🔒 Your profile and startup information are kept
+            as separate data sections.
+          </div>
+
+        </div>
+
       </div>
+
     </div>
   );
 }

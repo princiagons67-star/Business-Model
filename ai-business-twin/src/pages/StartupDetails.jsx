@@ -13,220 +13,170 @@ function StartupDetails() {
 
   const [saved, setSaved] = useState(false);
 
-  // Load existing startup data
   useEffect(() => {
-    const savedStartup = localStorage.getItem("startupData");
+    try {
+      const data = JSON.parse(
+        localStorage.getItem("startupData") || "{}"
+      );
 
-    if (savedStartup) {
-      setStartup(JSON.parse(savedStartup));
+      setStartup((prev) => ({
+        ...prev,
+        ...data,
+      }));
+    } catch {
+      console.log("Startup data error");
     }
   }, []);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const update = (e) => {
+    setStartup({
+      ...startup,
+      [e.target.name]: e.target.value,
+    });
 
-    setStartup((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+    setSaved(false);
   };
 
-  const handleSave = (event) => {
-    event.preventDefault();
-
+  const save = () => {
     localStorage.setItem(
       "startupData",
       JSON.stringify(startup)
     );
 
     setSaved(true);
-
-    setTimeout(() => {
-      setSaved(false);
-    }, 2000);
   };
 
   return (
-    <div>
-      <h1>Startup Details</h1>
+    <div className="page-container fade-in">
 
-      <p>
-        Manage the information about your startup and business.
-      </p>
+      <div className="page-header">
+        <div>
+          <h1>Startup Details</h1>
+          <p>
+            Manage the information used by your Business Twin.
+          </p>
+        </div>
+      </div>
 
-      <div className="dashboard-section">
+      <div className="card">
 
-        <form onSubmit={handleSave}>
+        <div className="grid-2">
 
-          {/* STARTUP INFORMATION */}
+          <div className="form-group">
+            <label>Startup Name</label>
 
-          <h2>Startup Information</h2>
+            <input
+              className="form-control"
+              name="startupName"
+              value={startup.startupName}
+              onChange={update}
+              placeholder="Your startup"
+            />
+          </div>
 
-          <label>
-            Startup Name
-          </label>
+          <div className="form-group">
+            <label>Industry</label>
 
-          <input
-            type="text"
-            name="startupName"
-            value={startup.startupName}
-            onChange={handleChange}
-            placeholder="Enter startup name"
-            required
-          />
+            <input
+              className="form-control"
+              name="industry"
+              value={startup.industry}
+              onChange={update}
+              placeholder="Technology, Healthcare..."
+            />
+          </div>
 
-          {/* INDUSTRY */}
+          <div className="form-group">
+            <label>Business Model</label>
 
-          <h2>Industry & Business Model</h2>
+            <select
+              className="form-control"
+              name="businessModel"
+              value={startup.businessModel}
+              onChange={update}
+            >
+              <option value="">Select</option>
+              <option>B2B</option>
+              <option>B2C</option>
+              <option>B2B2C</option>
+              <option>Subscription</option>
+              <option>Marketplace</option>
+            </select>
+          </div>
 
-          <label>
-            Industry
-          </label>
+          <div className="form-group">
+            <label>Employees</label>
 
-          <input
-            type="text"
-            name="industry"
-            value={startup.industry}
-            onChange={handleChange}
-            placeholder="Example: Technology"
-            required
-          />
+            <input
+              className="form-control"
+              type="number"
+              name="employees"
+              value={startup.employees}
+              onChange={update}
+            />
+          </div>
 
-          <label>
-            Business Model
-          </label>
+          <div className="form-group">
+            <label>Target Market</label>
 
-          <select
-            name="businessModel"
-            value={startup.businessModel}
-            onChange={handleChange}
-            required
-          >
-            <option value="">
-              Select business model
-            </option>
+            <input
+              className="form-control"
+              name="targetMarket"
+              value={startup.targetMarket}
+              onChange={update}
+            />
+          </div>
 
-            <option value="B2B">
-              B2B
-            </option>
+          <div className="form-group">
+            <label>Startup Stage</label>
 
-            <option value="B2C">
-              B2C
-            </option>
+            <select
+              className="form-control"
+              name="startupStage"
+              value={startup.startupStage}
+              onChange={update}
+            >
+              <option value="">Select</option>
+              <option>Idea</option>
+              <option>Pre-seed</option>
+              <option>Seed</option>
+              <option>Growth</option>
+              <option>Established</option>
+            </select>
+          </div>
 
-            <option value="B2B2C">
-              B2B2C
-            </option>
+        </div>
 
-            <option value="Subscription">
-              Subscription
-            </option>
-
-            <option value="Marketplace">
-              Marketplace
-            </option>
-          </select>
-
-          {/* TEAM */}
-
-          <h2>Team Information</h2>
-
-          <label>
-            Number of Employees
-          </label>
-
-          <input
-            type="number"
-            name="employees"
-            value={startup.employees}
-            onChange={handleChange}
-            placeholder="Enter number of employees"
-            min="0"
-            required
-          />
-
-          {/* TARGET MARKET */}
-
-          <label>
-            Target Market
-          </label>
-
-          <input
-            type="text"
-            name="targetMarket"
-            value={startup.targetMarket}
-            onChange={handleChange}
-            placeholder="Who are your customers?"
-          />
-
-          {/* STARTUP STAGE */}
-
-          <label>
-            Startup Stage
-          </label>
-
-          <select
-            name="startupStage"
-            value={startup.startupStage}
-            onChange={handleChange}
-            required
-          >
-            <option value="">
-              Select startup stage
-            </option>
-
-            <option value="Idea">
-              Idea
-            </option>
-
-            <option value="Pre-seed">
-              Pre-seed
-            </option>
-
-            <option value="Seed">
-              Seed
-            </option>
-
-            <option value="Growth">
-              Growth
-            </option>
-
-            <option value="Established">
-              Established
-            </option>
-          </select>
-
-          {/* BUSINESS GOALS */}
-
-          <h2>Business Goals</h2>
-
-          <label>
-            Business Goals
-          </label>
+        <div className="form-group">
+          <label>Business Goals</label>
 
           <textarea
+            className="form-control"
             name="businessGoals"
             value={startup.businessGoals}
-            onChange={handleChange}
-            placeholder="Describe your main business goals..."
-            rows="5"
+            onChange={update}
+            placeholder="Describe your business goals..."
           />
+        </div>
 
-          <br />
+        <button
+          className="btn btn-primary"
+          onClick={save}
+        >
+          Save Startup Details
+        </button>
 
-          <button type="submit">
-            Save Startup Details
-          </button>
-
-          {saved && (
-            <p>
-              Startup details saved successfully!
-            </p>
-          )}
-
-        </form>
+        {saved && (
+          <div
+            className="alert alert-success"
+            style={{ marginTop: 15 }}
+          >
+            Startup details saved successfully.
+          </div>
+        )}
 
       </div>
+
     </div>
   );
 }

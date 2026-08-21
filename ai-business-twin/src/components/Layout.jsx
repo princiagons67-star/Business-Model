@@ -2,23 +2,14 @@ import Sidebar from "./Sidebar";
 
 function Layout({ children }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="app-layout">
+
       <Sidebar />
 
-      <main
-        style={{
-          flex: 1,
-          padding: "30px",
-          background: "#f8fafc",
-        }}
-      >
+      <main className="main-content">
         {children}
       </main>
+
     </div>
   );
 }

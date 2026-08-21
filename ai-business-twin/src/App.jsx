@@ -1,9 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "./components/Layout";
 
 import FrontUI from "./pages/FrontUI";
-
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Register from "./pages/Register";
@@ -22,43 +21,16 @@ import AISimulator from "./pages/AISimulator";
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
 
-        {/* ======================
-            PUBLIC PAGES
-        ====================== */}
+        {/* PUBLIC */}
+        <Route path="/" element={<FrontUI />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        <Route
-          path="/"
-          element={<FrontUI />}
-        />
-
-        <Route
-          path="/signin"
-          element={<SignIn />}
-        />
-
-        <Route
-          path="/signup"
-          element={<SignUp />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
-
-
-        {/* ======================
-            APPLICATION
-        ====================== */}
-
+        {/* APPLICATION */}
         <Route
           path="/dashboard"
           element={
@@ -140,8 +112,13 @@ function App() {
           }
         />
 
-      </Routes>
+        {/* UNKNOWN URL */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
 
+      </Routes>
     </BrowserRouter>
   );
 }

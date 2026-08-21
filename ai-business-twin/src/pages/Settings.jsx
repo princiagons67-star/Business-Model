@@ -3,120 +3,81 @@ import { useState } from "react";
 function Settings() {
   const [settings, setSettings] = useState({
     notifications: true,
+    aiInsights: true,
+    monthlyReports: true,
     darkMode: false,
-    loginAlerts: true,
-    secureSession: true,
   });
 
-  const updateSetting = (name) => {
-    setSettings((previous) => ({
-      ...previous,
-      [name]: !previous[name],
-    }));
+  const toggle = (name) => {
+    setSettings({
+      ...settings,
+      [name]: !settings[name],
+    });
   };
 
   return (
-    <div>
-      <h1>Settings</h1>
+    <div className="page-container fade-in">
 
-      <p>
-        Manage your AI Business Twin preferences and security.
-      </p>
-
-      {/* ACCOUNT PREFERENCES */}
-
-      <div className="dashboard-section">
-        <h2>Account Preferences</h2>
-
-        <p>
-          Manage your general application preferences.
-        </p>
+      <div className="page-header">
+        <div>
+          <h1>Settings</h1>
+          <p>
+            Manage your Business Twin preferences.
+          </p>
+        </div>
       </div>
 
-      {/* NOTIFICATIONS */}
+      <div className="grid-2">
 
-      <div className="dashboard-section">
-        <h2>Notification Settings</h2>
+        <div className="card">
 
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.notifications}
-            onChange={() =>
-              updateSetting("notifications")
-            }
-          />
+          <h2>Notifications</h2>
 
-          Enable notifications
-        </label>
+          {[
+            ["notifications", "Business notifications"],
+            ["aiInsights", "AI recommendations"],
+            ["monthlyReports", "Monthly reports"],
+          ].map(([key, label]) => (
+            <div
+              key={key}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "18px 0",
+                borderBottom: "1px solid #e2e8f0",
+              }}
+            >
+              <span>{label}</span>
 
-        <p>
-          Receive important business and AI updates.
-        </p>
+              <input
+                type="checkbox"
+                checked={settings[key]}
+                onChange={() => toggle(key)}
+              />
+            </div>
+          ))}
+
+        </div>
+
+        <div className="card">
+
+          <h2>AI Preferences</h2>
+
+          <div className="alert alert-info">
+            Your settings only control the experience of
+            the application. They do not modify your startup
+            information.
+          </div>
+
+          <button className="btn btn-primary">
+            Save Settings
+          </button>
+
+        </div>
+
       </div>
 
-      {/* APPEARANCE */}
-
-      <div className="dashboard-section">
-        <h2>Appearance Settings</h2>
-
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.darkMode}
-            onChange={() =>
-              updateSetting("darkMode")
-            }
-          />
-
-          Dark mode
-        </label>
-      </div>
-
-      {/* SECURITY */}
-
-      <div className="dashboard-section">
-        <h2>Security Settings</h2>
-
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.loginAlerts}
-            onChange={() =>
-              updateSetting("loginAlerts")
-            }
-          />
-
-          Login alerts
-        </label>
-
-        <br />
-
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.secureSession}
-            onChange={() =>
-              updateSetting("secureSession")
-            }
-          />
-
-          Secure sessions
-        </label>
-
-        <br />
-        <br />
-
-        <button
-          onClick={() =>
-            alert(
-              "Password change will be connected to the backend later."
-            )
-          }
-        >
-          Change Password
-        </button>
-      </div>
     </div>
   );
 }

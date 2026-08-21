@@ -1,151 +1,94 @@
 import { useState } from "react";
 
 function Chatbot() {
-  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
-      sender: "ai",
-      text: "Hello! I'm your AI Business Twin assistant. Ask me about business planning, ESG, budget or recommendations.",
+      sender: "bot",
+      text: "Hello! I'm your AI Business Twin assistant. How can I help with your startup?",
     },
   ]);
 
-  const generateResponse = (question) => {
-    const text = question.toLowerCase();
-
-    if (text.includes("esg")) {
-      return "ESG measures Environmental, Social and Governance performance. You can check your detailed ESG score in the ESG Calculation section.";
-    }
-
-    if (
-      text.includes("budget") ||
-      text.includes("money") ||
-      text.includes("expense")
-    ) {
-      return "The Budget Optimizer helps you distribute your startup budget and identify possible savings.";
-    }
-
-    if (
-      text.includes("business") ||
-      text.includes("startup")
-    ) {
-      return "A good startup plan should clearly define your target market, business model, costs, goals and growth strategy.";
-    }
-
-    return "That's an interesting question. I recommend reviewing your startup details, ESG performance and budget before making a business decision.";
-  };
+  const [input, setInput] = useState("");
 
   const sendMessage = () => {
-    if (!message.trim()) return;
+    if (!input.trim()) return;
 
-    const userMessage = {
-      sender: "user",
-      text: message,
-    };
+    const userMessage = input;
 
-    const aiMessage = {
-      sender: "ai",
-      text: generateResponse(message),
-    };
-
-    setMessages((previous) => [
-      ...previous,
-      userMessage,
-      aiMessage,
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "user",
+        text: userMessage,
+      },
+      {
+        sender: "bot",
+        text: "Based on your business data, I recommend reviewing your ESG performance, budget allocation and growth strategy.",
+      },
     ]);
 
-    setMessage("");
-  };
-
-  const clearChat = () => {
-    setMessages([]);
+    setInput("");
   };
 
   return (
-    <div>
-      <h1>AI Chatbot</h1>
+    <div className="page-container fade-in">
 
-      <p>
-        Ask questions about your startup, ESG, budget and
-        business decisions.
-      </p>
+      <div className="page-header">
+        <div>
+          <h1>AI Business Assistant</h1>
+          <p>
+            Ask questions about your startup and business strategy.
+          </p>
+        </div>
+      </div>
 
-      <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "12px",
-          padding: "20px",
-          maxWidth: "800px",
-        }}
-      >
-        {/* MESSAGE AREA */}
+      <div className="chat-container">
 
-        <div
-          style={{
-            minHeight: "350px",
-            maxHeight: "450px",
-            overflowY: "auto",
-            marginBottom: "20px",
-          }}
-        >
-          {messages.map((item, index) => (
-            <div
-              key={index}
-              style={{
-                marginBottom: "15px",
-                textAlign:
-                  item.sender === "user"
-                    ? "right"
-                    : "left",
-              }}
-            >
-              <strong>
-                {item.sender === "user"
-                  ? "You"
-                  : "AI Assistant"}
-              </strong>
-
-              <p>{item.text}</p>
-            </div>
-          ))}
+        <div className="chat-header">
+          <h2>✦ AI Business Twin</h2>
+          <p>Business intelligence assistant</p>
         </div>
 
-        {/* INPUT */}
+        <div className="chat-messages">
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-          }}
-        >
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`chat-message ${message.sender}`}
+            >
+              {message.text}
+            </div>
+          ))}
+
+        </div>
+
+        <div className="chat-input">
+
           <input
-            type="text"
-            value={message}
-            onChange={(event) =>
-              setMessage(event.target.value)
+            className="form-control"
+            value={input}
+            onChange={(e) =>
+              setInput(e.target.value)
             }
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
                 sendMessage();
               }
             }}
-            placeholder="Ask your question..."
-            style={{
-              flex: 1,
-              padding: "12px",
-            }}
+            placeholder="Ask your AI assistant..."
           />
 
-          <button onClick={sendMessage}>
+          <button
+            className="btn btn-primary"
+            onClick={sendMessage}
+          >
             Send
           </button>
+
         </div>
 
-        <br />
-
-        <button onClick={clearChat}>
-          Clear Chat
-        </button>
       </div>
+
     </div>
   );
 }
