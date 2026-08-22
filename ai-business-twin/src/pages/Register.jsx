@@ -24,149 +24,103 @@ function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+  const { name, value } = event.target;
 
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  };
+  setForm((previous) => ({
+    ...previous,
+    [name]: value,
+  }));
+};
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    setError("");
+  setError("");
 
-    // =========================
-    // FRONTEND VALIDATION
-    // =========================
+  if (
+    !form.name ||
+    !form.email ||
+    !form.password ||
+    !form.startupName ||
+    !form.industry
+  ) {
+    setError("Please fill in all required fields.");
+    return;
+  }
 
-    if (
-      !form.name.trim() ||
-      !form.email.trim() ||
-      !form.password ||
-      !form.startupName.trim() ||
-      !form.industry.trim()
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
+  if (!form.email.includes("@")) {
+    setError("Please enter a valid email address.");
+    return;
+  }
 
-    if (!form.email.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+  if (form.password.length < 6) {
+    setError(
+      "Password must contain at least 6 characters."
+    );
+    return;
+  }
 
-    if (form.password.length < 6) {
-      setError(
-        "Password must contain at least 6 characters."
-      );
-      return;
-    }
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/auth/register",
+      {
+        method: "POST",
 
-    try {
-      setLoading(true);
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-      // =========================
-      // SEND DATA TO BACKEND
-      // =========================
-
-      const response = await fetch(
-        "http://localhost:5000/api/auth/register",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify({
-            name: form.name.trim(),
-            email: form.email.trim(),
-            password: form.password,
-            phone: form.phone.trim(),
-            role: form.role.trim(),
-
-            startupName: form.startupName.trim(),
-            industry: form.industry.trim(),
-            businessModel: form.businessModel,
-            employees: form.employees,
-            targetMarket: form.targetMarket.trim(),
-            startupStage: form.startupStage,
-            businessGoals: form.businessGoals.trim(),
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      // =========================
-      // BACKEND ERROR
-      // =========================
-
-      if (!response.ok) {
-        setError(
-          data.message || "Registration failed."
-        );
-
-        return;
+        body: JSON.stringify(form),
       }
+    );
 
-      // =========================
-      // REGISTRATION SUCCESS
-      // =========================
+    const data = await response.json();
 
-      console.log(
-        "Registration successful:",
-        data
-      );
-
-      /*
-        We only keep basic session information
-        on the frontend.
-
-        The actual account and startup data
-        belongs to the backend/database.
-      */
-
-      localStorage.setItem(
-        "userId",
-        String(data.user.id)
-      );
-
-      localStorage.setItem(
-        "userName",
-        data.user.name
-      );
-
-      localStorage.setItem(
-        "userEmail",
-        data.user.email
-      );
-
-      localStorage.setItem(
-        "isLoggedIn",
-        "true"
-      );
-
-      // Go to dashboard
-      navigate("/dashboard");
-
-    } catch (error) {
-      console.error(
-        "Registration error:",
-        error
-      );
-
+    if (!response.ok) {
       setError(
-        "Unable to connect to the server. Make sure the backend is running."
+        data.message || "Registration failed."
       );
-
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
 
+    // Save logged-in user
+    localStorage.setItem(
+      "userData",
+      JSON.stringify(data.user)
+    );
+
+    localStorage.setItem(
+      "isLoggedIn",
+      "true"
+    );
+
+    // Keep startup data locally for quick UI access
+    localStorage.setItem(
+      "startupData",
+      JSON.stringify({
+        startupName: form.startupName,
+        industry: form.industry,
+        businessModel: form.businessModel,
+        employees: form.employees,
+        targetMarket: form.targetMarket,
+        startupStage: form.startupStage,
+        businessGoals: form.businessGoals,
+      })
+    );
+
+    navigate("/dashboard");
+
+  } catch (error) {
+    console.error(
+      "Registration error:",
+      error
+    );
+
+    setError(
+      "Cannot connect to the backend. Make sure the backend is running."
+    );
+  }
+};
   return (
     <div className="auth-page">
 

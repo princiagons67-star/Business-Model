@@ -1,77 +1,127 @@
 import { useEffect, useState } from "react";
 
 function Dashboard() {
-  const [userName, setUserName] = useState("Founder");
-  const [startupName, setStartupName] = useState("Your Startup");
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    try {
-      const user = JSON.parse(
-        localStorage.getItem("userData") || "{}"
-      );
+    const loadDashboard = async () => {
+      try {
+        const savedUser = JSON.parse(
+          localStorage.getItem("userData") || "null"
+        );
 
-      const startup = JSON.parse(
-        localStorage.getItem("startupData") || "{}"
-      );
+        if (!savedUser || !savedUser.id) {
+          setError("User information not found. Please sign in again.");
+          setLoading(false);
+          return;
+        }
 
-      if (user.name) setUserName(user.name);
-      if (startup.startupName) {
-        setStartupName(startup.startupName);
+        const response = await fetch(
+          `http://localhost:5000/api/dashboard/${savedUser.id}`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message || "Failed to load dashboard."
+          );
+        }
+
+        setData(result);
+      } catch (err) {
+        console.error("Dashboard error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      console.log("Data loading error");
-    }
+    };
+
+    loadDashboard();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="page-container">
+        <div className="card">
+          <h2>Loading your business data...</h2>
+          <p>Please wait.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="page-container">
+        <div className="alert alert-error">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  const user = data.user;
+  const startup = data.startup || {};
+  const esg = data.esg || {};
+  const budget = data.budget || {};
+
+  const overallESG = Number(esg.overall_score || 0);
 
   return (
     <div className="page-container fade-in">
 
+      {/* HEADER */}
       <div className="page-header">
-
         <div>
           <h1>
-            Good morning, {userName} 👋
+            Welcome, {user.name} 👋
           </h1>
 
           <p>
-            Here's your business overview for {startupName}.
+            Here's your business overview for{" "}
+            <strong>
+              {startup.startup_name || "Your Startup"}
+            </strong>
+            .
           </p>
         </div>
 
         <span className="badge badge-green">
           ● Twin Active
         </span>
-
       </div>
 
-      {/* KPI */}
+      {/* STARTUP INFORMATION */}
       <div className="stats-grid">
-
-        <div className="stat-card stat-green">
-          <div className="stat-label">
-            Monthly Revenue
-          </div>
-
-          <div className="stat-value">
-            ₹5.0L
-          </div>
-
-          <div className="stat-description">
-            ↑ 12.5% from last month
-          </div>
-        </div>
 
         <div className="stat-card stat-blue">
           <div className="stat-label">
-            Business Growth
+            Startup
           </div>
 
           <div className="stat-value">
-            15.2%
+            {startup.startup_name || "Not set"}
           </div>
 
           <div className="stat-description">
-            Healthy growth trend
+            {startup.industry || "Industry not set"}
+          </div>
+        </div>
+
+        <div className="stat-card stat-green">
+          <div className="stat-label">
+            Employees
+          </div>
+
+          <div className="stat-value">
+            {startup.employees || 0}
+          </div>
+
+          <div className="stat-description">
+            Current team size
           </div>
         </div>
 
@@ -81,104 +131,79 @@ function Dashboard() {
           </div>
 
           <div className="stat-value">
-            82/100
+            {overallESG}/100
           </div>
 
           <div className="stat-description">
-            Above industry average
+            Sustainability performance
           </div>
         </div>
 
         <div className="stat-card stat-orange">
           <div className="stat-label">
-            Budget Used
+            Total Budget
           </div>
 
           <div className="stat-value">
-            70%
+            ₹{Number(budget.total_budget || 0).toLocaleString("en-IN")}
           </div>
 
           <div className="stat-description">
-            ₹3.5L of ₹5L allocated
+            Current allocated budget
           </div>
         </div>
 
       </div>
 
-      {/* MAIN */}
+      {/* BUSINESS INFORMATION */}
       <div className="grid-2">
 
         <div className="card">
 
           <div className="card-header">
             <div>
-              <h2>Business Health</h2>
-              <p>Current performance indicators</p>
-            </div>
-
-            <span className="badge badge-green">
-              Healthy
-            </span>
-          </div>
-
-          <div style={{ marginBottom: 20 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 7,
-              }}
-            >
-              <span>Revenue</span>
-              <strong>78%</strong>
-            </div>
-
-            <div className="progress">
-              <div
-                className="progress-bar"
-                style={{ width: "78%" }}
-              />
+              <h2>Startup Overview</h2>
+              <p>Your registered business information</p>
             </div>
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 7,
-              }}
-            >
-              <span>Customer Growth</span>
-              <strong>68%</strong>
+          <div className="info-list">
+
+            <div>
+              <span>Startup Name</span>
+              <strong>
+                {startup.startup_name || "Not provided"}
+              </strong>
             </div>
 
-            <div className="progress">
-              <div
-                className="progress-bar"
-                style={{ width: "68%" }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 7,
-              }}
-            >
-              <span>Operational Efficiency</span>
-              <strong>84%</strong>
+            <div>
+              <span>Industry</span>
+              <strong>
+                {startup.industry || "Not provided"}
+              </strong>
             </div>
 
-            <div className="progress">
-              <div
-                className="progress-bar"
-                style={{ width: "84%" }}
-              />
+            <div>
+              <span>Business Model</span>
+              <strong>
+                {startup.business_model || "Not provided"}
+              </strong>
             </div>
+
+            <div>
+              <span>Target Market</span>
+              <strong>
+                {startup.target_market || "Not provided"}
+              </strong>
+            </div>
+
+            <div>
+              <span>Startup Stage</span>
+              <strong>
+                {startup.startup_stage || "Not provided"}
+              </strong>
+            </div>
+
           </div>
 
         </div>
@@ -194,129 +219,109 @@ function Dashboard() {
           </div>
 
           <div className="esg-score">
-            <span>82</span>
+            <span>{overallESG}</span>
           </div>
 
-          <div
-            style={{
-              textAlign: "center",
-              color: "#64748b",
-              fontSize: 13,
-            }}
-          >
-            Excellent sustainability performance
+          <div className="esg-breakdown">
+
+            <div>
+              <span>Environmental</span>
+              <strong>
+                {Number(
+                  esg.environmental_score || 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Social</span>
+              <strong>
+                {Number(esg.social_score || 0)}
+              </strong>
+            </div>
+
+            <div>
+              <span>Governance</span>
+              <strong>
+                {Number(esg.governance_score || 0)}
+              </strong>
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* LOWER */}
+      {/* BUDGET */}
       <div
-        className="grid-2"
-        style={{ marginTop: 20 }}
+        className="card"
+        style={{ marginTop: "20px" }}
       >
 
-        <div className="card">
-
-          <div className="card-header">
-            <div>
-              <h2>AI Recommendations</h2>
-              <p>Suggestions generated for your business</p>
-            </div>
+        <div className="card-header">
+          <div>
+            <h2>Budget Overview</h2>
+            <p>Current resource allocation</p>
           </div>
-
-          <div className="alert alert-info">
-            <strong>Increase digital marketing</strong>
-            <br />
-            Your current customer acquisition rate suggests
-            that additional digital campaigns could improve
-            growth.
-          </div>
-
-          <div className="alert alert-success">
-            <strong>ESG performance is strong</strong>
-            <br />
-            Continue your current sustainability initiatives.
-          </div>
-
         </div>
 
-        <div className="card">
+        <div className="budget-row">
+          <span>Marketing</span>
+          <strong>
+            ₹{Number(
+              budget.marketing_budget || 0
+            ).toLocaleString("en-IN")}
+          </strong>
+        </div>
 
-          <div className="card-header">
-            <div>
-              <h2>Budget Overview</h2>
-              <p>Current resource allocation</p>
-            </div>
-          </div>
+        <div className="budget-row">
+          <span>Operations</span>
+          <strong>
+            ₹{Number(
+              budget.operations_budget || 0
+            ).toLocaleString("en-IN")}
+          </strong>
+        </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>Marketing</span>
-              <strong>₹1.4L</strong>
-            </div>
+        <div className="budget-row">
+          <span>Technology</span>
+          <strong>
+            ₹{Number(
+              budget.technology_budget || 0
+            ).toLocaleString("en-IN")}
+          </strong>
+        </div>
 
-            <div
-              className="progress"
-              style={{ marginTop: 7 }}
-            >
-              <div
-                className="progress-bar"
-                style={{ width: "70%" }}
-              />
-            </div>
-          </div>
+        <div className="budget-row">
+          <span>Employees</span>
+          <strong>
+            ₹{Number(
+              budget.employee_budget || 0
+            ).toLocaleString("en-IN")}
+          </strong>
+        </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>Operations</span>
-              <strong>₹1.2L</strong>
-            </div>
+      </div>
 
-            <div
-              className="progress"
-              style={{ marginTop: 7 }}
-            >
-              <div
-                className="progress-bar"
-                style={{ width: "60%" }}
-              />
-            </div>
-          </div>
+      {/* AI RECOMMENDATIONS */}
+      <div
+        className="card"
+        style={{ marginTop: "20px" }}
+      >
 
+        <div className="card-header">
           <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>Technology</span>
-              <strong>₹0.9L</strong>
-            </div>
-
-            <div
-              className="progress"
-              style={{ marginTop: 7 }}
-            >
-              <div
-                className="progress-bar"
-                style={{ width: "45%" }}
-              />
-            </div>
+            <h2>AI Business Insights</h2>
+            <p>Suggestions based on your current data</p>
           </div>
+        </div>
 
+        <div className="alert alert-info">
+          <strong>Complete your business data</strong>
+          <br />
+          Add ESG measurements and budget information to
+          receive more meaningful business recommendations.
         </div>
 
       </div>

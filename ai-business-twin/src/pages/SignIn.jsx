@@ -8,7 +8,7 @@ function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
     setError("");
@@ -18,27 +18,51 @@ function SignIn() {
       return;
     }
 
-    const savedUser = JSON.parse(
-      localStorage.getItem("userData") || "null"
-    );
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        }
+      );
 
-    if (
-      savedUser &&
-      savedUser.email === email &&
-      savedUser.password === password
-    ) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(
+          data.message || "Invalid email or password."
+        );
+        return;
+      }
+
+      // Save logged-in user
+      localStorage.setItem(
+        "userData",
+        JSON.stringify(data.user)
+      );
+
       localStorage.setItem(
         "isLoggedIn",
         "true"
       );
 
+      // Go to dashboard
       navigate("/dashboard");
-      return;
-    }
 
-    setError(
-      "Account not found or password is incorrect."
-    );
+    } catch (error) {
+      console.error("Login error:", error);
+
+      setError(
+        "Cannot connect to the backend. Make sure the backend is running."
+      );
+    }
   };
 
   return (
